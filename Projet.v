@@ -101,9 +101,9 @@ end).
 
 Lemma testTac_isABR : (isABR (Node 5 (Node 3 (Node 2 Empty Empty) (Node 4 Empty Empty)) (Node 8 (Node 6 Empty Empty) (Node 11 Empty Empty)))).
 tactique_isABR.
+Qed.
 
-Lemma test_isntABR : ~(isABR (Node 5 (Node 3 Empty Empty) (Node 4 Empty Empty))).
-(**)
+(*Lemma test_isntABR : ~(isABR (Node 5 (Node 3 Empty Empty) (Node 4 Empty Empty))).*)
 
 (* --- Fonction de recherche d'un element dans un ABR --- *)
 Fixpoint search (arb : Abin) (x : nat) : Prop :=
@@ -191,58 +191,31 @@ Functional Scheme insertABRInd := Induction for insert Sort Prop.
 Functional Scheme supprABRInd := Induction for suppr Sort Prop.
 
 (* --- PREUVES --- *)
-Lemma proof_search : forall (a : Abin) (n: nat), (isABR a) -> (isNode a n) -> (search a n).
-(*intros.
-induction a.
-simpl.
-inversion H0.
-simpl.
-elim (Nat.eq_dec n n0); elim (lt_dec n n0);intros; auto.
-apply IHa1.
-inversion H.
-tactique_isABR.
-apply H5.
-*)
+Lemma proof_search_correction : forall (a : Abin) (n: nat), (search a n) -> (isNode a n).
 
-Lemma proof_insert : forall (a : Abin) (n: nat), (isABR a) -> (isABR (insert a n)).
-intros.
-elim H; intros.
-simpl.
-tactique_isABR.
-simpl.
-elim (Nat.eq_dec n n0); elim (lt_dec n n0);intros.
-tactique_isABR.
-rewrite <- a1.
-rewrite <- H1.
-auto.
-rewrite <- a1.
-rewrite <- H2.
-auto.
-rewrite <- a1.
-rewrite <- H2.
-auto.
+Lemma proof_search_completude : forall (a: Abin) (n:nat), (isABR a) -> (isNode a n) -> (search a n).
 
-tactique_isABR.
-rewrite <- a0.
-rewrite <- H1.
-auto.
-rewrite <- a0.
-rewrite <- H2.
-auto.
-rewrite <- a0.
-rewrite <- H2.
-auto.
+Lemma proof_insert_is_node : forall (n : nat) (a : Abin), (isNode (insert a n) n).
 
-tactique_isABR.
-rewrite <- H1.
-auto.
-rewrite <- a0.
-rewrite <- H2.
-auto.
-rewrite <- a0.
-rewrite <- H2.
-auto.
+Lemma proof_insert_missing_correction : forall (n m : nat) (a: Abin), ((n <>m) /\ (isNode (insert a n) m)) -> (isNode a m).
 
-(* Search : 
-Insert : inserer un element , element d'avant sont encore dans l'arbre, arbre d'avant + element et rien d'autre
-suppr : supprime bien un element , ....*)
+Lemma proof_insert_missing_completude : forall (n m : nat) (a: Abin), (isNode a m) -> (isNode (insert a n) m).
+
+Lemma proof_insert_unexpected_correction : forall (n m : nat) (a : Abin), ((n <>m) /\ ~(isNode (insert a n) m)) -> ~(isNode a m).
+
+Lemma proof_insert_unexpected_completude : forall (n m : nat) (a : Abin), ~(isNode a m) -> ~(isNode (insert a n) m).
+
+Lemma insert_left_abr_correction : forall (n m : nat) (left : Abin), ((n < m) /\ (isMax (insert left n) m)) -> (isMax left m).
+
+Lemma insert_left_abr_completude : forall (n m : nat) (left : Abin),  (isMax left m) -> (isMax (insert left n) m).
+
+Lemma insert_right_abr_correction : forall (n m : nat) (right : Abin), ((n > m) /\ (isMin (insert right n) m)) -> (isMin right m).
+
+Lemma insert_right_abr_completude : forall (n m : nat) (right : Abin), (isMin right m) -> (isMin (insert right n) m).
+
+Lemma insert_is_abr_correction : forall (n : nat) (a : Abin), (isABR (insert a n)) -> (isABR a).
+
+Lemma insert_is_abr_completude : forall (n : nat) (a : Abin), (isABR a) -> (isABR (insert a n)).
+
+
+
