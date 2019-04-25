@@ -34,8 +34,8 @@ Compute (nbNodeAbin (Node 5 (Node 6 Empty Empty) (Node 7 (Node 8 Empty Empty) Em
 (* --- Noeud --- *)
 Inductive isNode : Abin -> nat -> Prop :=
 | verifCurrentNode : forall (n:nat) (left right : Abin), (isNode (Node n left right) n)
-| verifLeft : forall (n l : nat) (left right : Abin), (isNode left l) -> (isNode (Node n left right) n)
-| verifRight : forall (n r : nat) (left right : Abin), (isNode right r) -> (isNode (Node n left right) n).
+| verifLeft : forall (n m : nat) (left right : Abin), (isNode left m) -> (isNode (Node n left right) m)
+| verifRight : forall (n m : nat) (left right : Abin), (isNode right m) -> (isNode (Node n left right) m).
 
 (* --- Feuille --- *)
 Inductive isLeaf : Abin -> Prop :=
@@ -66,9 +66,11 @@ apply verifNodeABR. apply verifEmptyABR. apply verifEmptyABR.
 apply max_Empty.
 apply min_Empty.
 apply max_n.
-intros. inversion H. auto. auto. auto.
+intros. inversion H. auto.
+inversion H4. inversion H4.
 apply min_n.
-intros. inversion H. auto. auto. auto.
+intros. inversion H. auto.
+inversion H4. inversion H4.
 apply verifNodeABR. apply verifNodeABR.
 apply verifEmptyABR. apply verifEmptyABR.
 apply max_Empty.
@@ -77,17 +79,29 @@ apply verifNodeABR. apply verifEmptyABR. apply verifEmptyABR.
 apply max_Empty.
 apply min_Empty.
 apply max_n.
-intros. inversion H. auto. auto . auto.
+intros. inversion H. auto.
+inversion H4. inversion H4.
 apply min_n.
-intros. inversion H. auto. auto. auto. 
+intros. inversion H. auto.
+inversion H4. inversion H4.
 apply max_n.
-intros. inversion H. auto. auto. auto.
+intros. inversion H. auto.
+inversion H4. inversion H4.
+auto. auto. auto.
+inversion H4. inversion H4.
+auto. auto. auto.
+inversion H4. inversion H4.
+auto. auto. auto.
+inversion H19. inversion H9. inversion H9. inversion H9.
+inversion H4. auto. inversion H9. inversion H9.
 apply min_n.
-intros. inversion H. auto. auto. auto.
+intros. inversion H. auto.
+inversion H4. auto. inversion H9. inversion H9. inversion H4. omega.
+inversion H9. inversion H9.
 Qed.
 
 Ltac tactique_isABR :=
-repeat (auto ||
+repeat (auto || omega ||
  match goal with
 | |- isABR Empty => apply verifEmptyABR
 | |- isABR (Node ?n Empty Empty) => apply verifLeafABR
@@ -97,6 +111,14 @@ repeat (auto ||
 | |- isMax (Node ?n ?m ?o) ?p => apply max_n; intros
 | |- isMin (Node ?n ?m ?o) ?p => apply min_n; intros
 | H : isNode (Node ?w ?x ?y) ?z |- _ => inversion H; clear H
+| H : isNode (Node ?z Empty Empty) ?n|-  ?n > ?y => inversion H; clear H
+| H : isNode (Node ?z Empty Empty) ?n|-  ?n < ?y => inversion H;clear H
+| H : isNode (Node ?z Empty Empty) ?n|-  ?n >= ?y => inversion H; clear H
+| H : isNode (Node ?z Empty Empty) ?n|-  ?n <= ?y => inversion H; clear H
+| H : isNode Empty ?n|- ?n > ?y => inversion H; clear H
+| H : isNode Empty ?n|- ?n >= ?y => inversion H; clear H
+| H : isNode Empty ?n|- ?n < ?y => inversion H; clear H
+| H : isNode Empty ?n|- ?n <= ?y => inversion H; clear H
 end).
 
 Lemma testTac_isABR : (isABR (Node 5 (Node 3 (Node 2 Empty Empty) (Node 4 Empty Empty)) (Node 8 (Node 6 Empty Empty) (Node 11 Empty Empty)))).
@@ -186,12 +208,19 @@ Compute (suppr (Node 5 (Node 3 (Node 2 Empty Empty) (Node 4 Empty Empty)) (Node 
 Compute (suppr (Node 5 (Node 3 (Node 2 Empty Empty) (Node 4 Empty Empty)) (Node 8 (Node 6 Empty Empty) (Node 11 Empty Empty))) 8).
 
 
-Functional Scheme searchABRInd := Induction for search Sort Prop.
-Functional Scheme insertABRInd := Induction for insert Sort Prop.
-Functional Scheme supprABRInd := Induction for suppr Sort Prop.
+Functional Scheme searchInductive := Induction for search Sort Prop.
+Functional Scheme insertInductive := Induction for insert Sort Prop.
+Functional Scheme supprInductive := Induction for suppr Sort Prop.
 
 (* --- PREUVES --- *)
 Lemma proof_search_correction : forall (a : Abin) (n: nat), (search a n) -> (isNode a n).
+intro.
+intro.
+functional induction (search a n) using searchInductive;intros.
+inversion H.
+apply verifCurrentNode.
+apply verifLeft with x.
+
 
 Lemma proof_search_completude : forall (a: Abin) (n:nat), (isABR a) -> (isNode a n) -> (search a n).
 
